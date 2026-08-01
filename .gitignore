@@ -37,6 +37,7 @@ debug-*.html
 
 # Reference materials (local only)
 assets/instagram_refs/
+logo/
 
 # Business / client documents — local only, NEVER push
 contract/

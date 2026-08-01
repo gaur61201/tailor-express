@@ -31,7 +31,7 @@
   <meta name="twitter:description" content="9 branches across Kuwait offering alterations, home service, drive-thru, and Tailor Cloud 24/7 smart lockers." />
   <meta name="twitter:image" content="https://tailorexpresskw.com/assets/image_background_about_section/bg_01.webp" />
 
-  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
+  <link rel="icon" type="image/png" href="assets/icons/favicon.png" />
 
   <!-- Preload the hero video poster — the above-the-fold LCP image candidate -->
   <link rel="preload" as="image" href="assets/hero_background/tailor_express_hero_poster.webp" fetchpriority="high" />
@@ -70,9 +70,9 @@
         "url": "https://tailorexpresskw.com/",
         "logo": {
           "@type": "ImageObject",
-          "url": "https://tailorexpresskw.com/assets/icons/favicon.svg",
-          "width": 128,
-          "height": 128
+          "url": "https://tailorexpresskw.com/assets/icons/brand-x-mark.png",
+          "width": 220,
+          "height": 220
         },
         "foundingDate": "2019",
         "areaServed": {
@@ -110,7 +110,7 @@
         "name": "Tailor Express",
         "alternateName": "Tailor Express Kuwait",
         "image": "https://tailorexpresskw.com/assets/image_background_about_section/bg_01.webp",
-        "logo": "https://tailorexpresskw.com/assets/icons/favicon.svg",
+        "logo": "https://tailorexpresskw.com/assets/icons/brand-x-mark.png",
         "telephone": "+96598742477",
         "address": {
           "@type": "PostalAddress",
@@ -499,14 +499,8 @@
   <div id="preloader" class="preloader" aria-hidden="true">
     <div class="preloader__stage">
 
-      <!-- The X mark — drawn via stroke-dashoffset animation
-           viewBox is centered on (0,0) for predictable rotation/scaling.
-           Circle radius 56, X strokes run -32→32 on both diagonals. -->
-      <svg class="preloader__x" viewBox="-64 -64 128 128" aria-hidden="true" focusable="false">
-        <circle cx="0" cy="0" r="56" fill="none" stroke="#f06449" stroke-width="2" pathLength="100" class="preloader__x-circle" />
-        <line x1="-32" y1="-32" x2="32" y2="32" stroke="#f06449" stroke-width="2" stroke-linecap="round" pathLength="100" class="preloader__x-stroke" />
-        <line x1="-32" y1="32"  x2="32" y2="-32" stroke="#f06449" stroke-width="2" stroke-linecap="round" pathLength="100" class="preloader__x-stroke" />
-      </svg>
+      <!-- Real brand mark (cropped from client-supplied logo) -->
+      <img class="preloader__x" src="assets/icons/brand-x-mark.png" alt="" aria-hidden="true" />
 
       <div class="preloader__wordmark">
         <span class="en-text">TAILOR EXPRESS</span>
@@ -530,11 +524,7 @@
       <!-- Brand mark -->
       <a href="#top" class="nav__brand" aria-label="Tailor Express — home">
         <span class="nav__brand-icon" aria-hidden="true">
-          <svg viewBox="-64 -64 128 128" focusable="false">
-            <circle cx="0" cy="0" r="56" fill="#60202e" />
-            <line x1="-28" y1="-28" x2="28" y2="28" stroke="#ffffff" stroke-width="6" stroke-linecap="round" />
-            <line x1="-28" y1="28"  x2="28" y2="-28" stroke="#ffffff" stroke-width="6" stroke-linecap="round" />
-          </svg>
+          <img src="assets/icons/brand-x-mark.png" alt="" width="64" height="64" />
         </span>
         <span class="nav__brand-text">
           <span class="en-text">Tailor Express</span>

@@ -51,8 +51,6 @@
     }
 
     const xSvg     = preloader.querySelector('.preloader__x');
-    const xCircle  = preloader.querySelector('.preloader__x-circle');
-    const xStrokes = preloader.querySelectorAll('.preloader__x-stroke');
     const wordmark = preloader.querySelector('.preloader__wordmark');
     const barFill  = preloader.querySelector('.preloader__bar-fill');
 
@@ -66,20 +64,10 @@
       }
     });
 
-    // Step 1: X stitches itself (~2.0–2.5s, power3.inOut)
+    // Step 1: brand mark eases in (~2.2s, power3.inOut)
     tl.fromTo(xSvg,
-      { scale: 0.95, transformOrigin: '50% 50%' },
-      { scale: 1.0, duration: 2.2, ease: 'power3.inOut' }
-    )
-    .fromTo(xCircle,
-      { strokeDashoffset: 100 },
-      { strokeDashoffset: 0, duration: 1.4, ease: 'power3.inOut' },
-      0
-    )
-    .fromTo(xStrokes,
-      { strokeDashoffset: 100 },
-      { strokeDashoffset: 0, duration: 1.2, ease: 'power3.inOut', stagger: 0.15 },
-      0.7
+      { scale: 0.95, opacity: 0, transformOrigin: '50% 50%' },
+      { scale: 1.0, opacity: 1, duration: 2.2, ease: 'power3.inOut' }
     )
     // Step 2: wordmark fade in (overlaps end of Step 1)
     .to(wordmark,
