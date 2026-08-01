@@ -1765,9 +1765,11 @@
   //                  on click (lightbox). Videos are portrait (720×1280).
   //   type 'image' → THREE.TextureLoader as before.
   // Indices line up with PLANE_LAYOUT and the 2D-fallback tiles in index.html.
-  // Homepage shows 2 videos (one centre hero + one mid-left) + all 10 photos.
+  // Desktop shows 2 videos (one centre hero + one mid-left) + all 10 photos;
+  // mobile (≤899px) drops both videos — photos-only, same slots/positions.
   const G = 'assets/gallery';
-  const GALLERY_IMAGES = [
+  const isMobileGalleryContent = window.matchMedia('(max-width: 899px)').matches;
+  const GALLERY_IMAGES_ALL = [
     { type: 'video', src: `${G}/video-1.mp4`, poster: `${G}/video-1-poster.webp`, alt: 'Tailor Express — alterations in progress.' },
     { type: 'video', src: `${G}/video-2.mp4`, poster: `${G}/video-2-poster.webp`, alt: 'Tailor Express — fitting and finishing a garment.' },
     { type: 'image', src: `${G}/portrait-1.webp`,  alt: 'Hand-finishing a garment at Tailor Express.' },
@@ -1781,13 +1783,16 @@
     { type: 'image', src: `${G}/landscape-4.webp`, alt: 'Tailoring tools and materials.' },
     { type: 'image', src: `${G}/landscape-5.webp`, alt: 'Finished tailoring work.' },
   ];
+  const GALLERY_IMAGES = isMobileGalleryContent
+    ? GALLERY_IMAGES_ALL.filter((item) => item.type !== 'video')
+    : GALLERY_IMAGES_ALL;
 
   // Per-plane layout — index-matched to GALLERY_IMAGES (12 planes). Sizes are
   // explicit per plane and chosen to match each item's orientation: portrait
   // videos (idx 0,1) and portrait photos (idx 2–6) are tall; landscape photos
   // (idx 7–11) are wide. Centre video (idx 0) is the largest focal piece.
   //   rot = [rotX, rotY, rotZ]    pos = [x, y, z]    size = [w, h]
-  const PLANE_LAYOUT = [
+  const PLANE_LAYOUT_ALL = [
     // 0 — CENTRE video (hero, portrait)
     { size: [2.9, 5.16], pos: [ 0.0, 4.6,  4.5], rot: [ 0,     0,    0], drift: { kind: 'updown',    amp: 0.08, period: 12 } },
     // 1 — second video (mid-left, portrait)
@@ -1813,10 +1818,23 @@
     // 11 — landscape photo, top-centre-back
     { size: [3.2, 2.40], pos: [ 0.0, 8.9, -9.0], rot: [ 0,     0,    0], drift: { kind: 'leftright', amp: 0.10, period: 12 } },
   ];
+  // Mobile drops the 2 video slots (indices 0,1) — remaining photo planes
+  // keep their existing positions, index-realigned to the filtered GALLERY_IMAGES.
+  const PLANE_LAYOUT = isMobileGalleryContent
+    ? PLANE_LAYOUT_ALL.filter((_, i) => GALLERY_IMAGES_ALL[i].type !== 'video')
+    : PLANE_LAYOUT_ALL;
 
   const initGallery = () => {
     const section = document.getElementById('gallery');
     if (!section) return;
+
+    // Mobile: strip the video tiles from the 2D-fallback mosaic too, so the
+    // no-video rule holds whether a mobile visitor gets the 3D scene or ever
+    // lands on this fallback (low-end GPU / no WebGL / reduced-motion).
+    // Desktop keeps all 12 tiles untouched.
+    if (isMobileGalleryContent) {
+      section.querySelectorAll('.gallery__tile--video').forEach((li) => li.remove());
+    }
 
     const eyebrow      = section.querySelector('.gallery__eyebrow');
     const heading      = section.querySelector('.gallery__heading');
@@ -1824,6 +1842,13 @@
     const grid         = section.querySelector('.gallery__grid');
     const tiles        = Array.from(section.querySelectorAll('.gallery__tile'));
     const tileBtns     = Array.from(section.querySelectorAll('.gallery__tile-btn'));
+    // Renumber remaining tiles' aria-labels to match the new (smaller) total
+    // — the static markup says "N of 12"; mobile is now "N of 10".
+    if (isMobileGalleryContent) {
+      tileBtns.forEach((btn, i) => {
+        btn.setAttribute('aria-label', `Open gallery image ${i + 1} of ${tileBtns.length}`);
+      });
+    }
     const lightbox     = document.getElementById('gallery-lightbox');
     const lightboxImg  = lightbox?.querySelector('.gallery-lightbox__img');
     const lightboxCur  = lightbox?.querySelector('.gallery-lightbox__counter-current');
@@ -3595,7 +3620,10 @@
     const VID_H = 5.33, PORT_H = 3.47, PORT_S_H = 3.07, LAND_H = 2.70, LAND_L_H = 3.15;
     // Nominal aspect just for the placeholder geometry shown until media loads.
     const HINT_V = 0.5625, HINT_P = 0.66, HINT_L = 1.4;
-    const planeConfigs = [
+    // Mobile (≤768px) drops all 3 centre videos — the 10 fanned photos stay
+    // exactly where they are (an intentional gap through the centre of the
+    // sweep on mobile only; desktop keeps the full 13-plane composition).
+    const planeConfigsAll = [
       // --- centre focal trio: the 3 videos (azimuth -23/0/+23) ---
       { type: 'video', src: GV(2), poster: GVP(2), azimuth: -23, radius: 8.5, y:  0.2, h: VID_H,    hint: HINT_V, alt: 'Tailor Express — fitting and finishing a garment.' },
       { type: 'video', src: GV(1), poster: GVP(1), azimuth:   0, radius: 7.5, y:  0.0, h: VID_H,    hint: HINT_V, alt: 'Tailor Express — alterations in progress.' },
@@ -3613,6 +3641,9 @@
       { type: 'image', src: GP(5), azimuth:  80, radius: 13.0, y:  2.0, h: PORT_S_H, hint: HINT_P, alt: 'Pinning and measuring at Tailor Express.' },
       { type: 'image', src: GL(5), azimuth:  96, radius: 19.0, y: -2.0, h: LAND_L_H, hint: HINT_L, alt: 'Finished tailoring work.' },
     ];
+    const planeConfigs = isMobile
+      ? planeConfigsAll.filter((c) => c.type !== 'video')
+      : planeConfigsAll;
     console.log('[GALLERY] media planes:', planeConfigs.length);
 
     /* ---- Build planes ---- */
