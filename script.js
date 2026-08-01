@@ -69,9 +69,9 @@
       { scale: 0.95, opacity: 0, transformOrigin: '50% 50%' },
       { scale: 1.0, opacity: 1, duration: 2.2, ease: 'power3.inOut' }
     )
-    // Step 2: wordmark fade in (overlaps end of Step 1)
+    // Step 2: wordmark fades + wipes in left-to-right (overlaps end of Step 1)
     .to(wordmark,
-      { opacity: 1, duration: 1.0, ease: 'power3.out' },
+      { opacity: 1, clipPath: 'inset(0% 0% 0% 0%)', duration: 1.0, ease: 'power2.out' },
       1.8
     )
     // Step 3: progress bar fills

@@ -262,7 +262,8 @@ body[dir="rtl"] .eyebrow { letter-spacing: 0.05em; text-transform: none; }
   letter-spacing: 0.04em;
   color: var(--color-blush);
   opacity: 0;
-  /* JS fades to 1 */
+  clip-path: inset(0% 100% 0% 0%);
+  /* JS fades in + wipes the clip-path left-to-right */
 }
 body[dir="rtl"] .preloader__wordmark {
   font-family: var(--font-ar);
