@@ -1782,6 +1782,12 @@
     { type: 'image', src: `${G}/landscape-3.webp`, alt: 'Garments and fabric at Tailor Express.' },
     { type: 'image', src: `${G}/landscape-4.webp`, alt: 'Tailoring tools and materials.' },
     { type: 'image', src: `${G}/landscape-5.webp`, alt: 'Finished tailoring work.' },
+    { type: 'image', src: `${G}/portrait-6.webp`,  alt: 'Home-service fitting — measuring a client at home.' },
+    { type: 'image', src: `${G}/portrait-7.webp`,  alt: 'A Tailor Express home-service delivery, freshly altered garments in hand.' },
+    { type: 'image', src: `${G}/portrait-8.webp`,  alt: 'A female tailor providing a home-service fitting.' },
+    { type: 'image', src: `${G}/landscape-6.webp`, alt: 'Threading a needle at a Tailor Express sewing station.' },
+    { type: 'image', src: `${G}/landscape-7.webp`, alt: 'A tailor at work inside a Tailor Express branch.' },
+    { type: 'image', src: `${G}/landscape-8.webp`, alt: 'The Tailor Express brand mark inside a branch interior.' },
   ];
   const GALLERY_IMAGES = isMobileGalleryContent
     ? GALLERY_IMAGES_ALL.filter((item) => item.type !== 'video')
@@ -1817,6 +1823,18 @@
     { size: [2.6, 1.95], pos: [-4.4, 2.7, -0.5], rot: [-0.05,  0.12, 0], drift: { kind: 'circle',    amp: 0.08, period: 11 } },
     // 11 — landscape photo, top-centre-back
     { size: [3.2, 2.40], pos: [ 0.0, 8.9, -9.0], rot: [ 0,     0,    0], drift: { kind: 'leftright', amp: 0.10, period: 12 } },
+    // 12 — portrait photo, far-left extension
+    { size: [2.0, 2.67], pos: [-11.5, 5.0,  1.0], rot: [ 0,     0.28, 0], drift: { kind: 'updown',    amp: 0.09, period: 9  } },
+    // 13 — portrait photo, far-right extension
+    { size: [1.9, 2.53], pos: [11.5, 5.5, -2.0], rot: [ 0,    -0.28, 0], drift: { kind: 'leftright', amp: 0.11, period: 10 } },
+    // 14 — portrait photo, close foreground, right-of-centre
+    { size: [1.8, 2.40], pos: [ 2.0, 3.0,  5.5], rot: [ 0,     0.05, 0], drift: { kind: 'circle',    amp: 0.08, period: 9  } },
+    // 15 — landscape photo, mid-left, close
+    { size: [2.6, 1.95], pos: [-3.0, 5.8, -3.5], rot: [ 0,     0.10, 0], drift: { kind: 'updown',    amp: 0.08, period: 11 } },
+    // 16 — landscape photo, mid-right-back
+    { size: [3.0, 2.25], pos: [ 7.5, 6.5, -4.0], rot: [ 0,    -0.15, 0], drift: { kind: 'circle',    amp: 0.09, period: 12 } },
+    // 17 — landscape photo, top-left-back
+    { size: [2.4, 1.80], pos: [-2.0, 8.3, -7.0], rot: [ 0,     0.05, 0], drift: { kind: 'leftright', amp: 0.10, period: 8  } },
   ];
   // Mobile drops the 2 video slots (indices 0,1) — remaining photo planes
   // keep their existing positions, index-realigned to the filtered GALLERY_IMAGES.
@@ -3594,10 +3612,11 @@
     };
     const celestialLogo = createCelestialLogo();
 
-    /* ---- Plane configuration: 13 planes (3 videos + 10 photos) hand-placed
+    /* ---- Plane configuration: 19 planes (3 videos + 16 photos) hand-placed
        across the FRONT arc the camera sweeps (rotation.y +π/2 → -π/2 ≈ azimuth
-       -90°→+90°). x = sin(az)·r, z = -cos(az)·r sits each plane on a circle
-       around the camera at the origin.
+       -90°→+90°, though the 75-85° hFOV means items out to roughly ±125° still
+       get a moment on-screen at the very start/end of the sweep). x = sin(az)·r,
+       z = -cos(az)·r sits each plane on a circle around the camera at the origin.
 
        SIZING: every plane keeps a FIXED HEIGHT per tier (video / portrait /
        landscape — set below); its WIDTH is derived at load time from the
@@ -3606,10 +3625,11 @@
        first paint before the real ratio lands.
 
        LAYOUT: the 3 videos are the focal trio at the centre (azimuth -23/0/+23,
-       close radius). The 10 photos fan out left/right at progressively larger
-       radius. Azimuths + radii are tuned (layout_solver, 2026-06-29) so each
-       plane's on-screen angular width stays clear of its neighbours — no
-       cramping/overlap anywhere (min adjacent gap ≈ 1.6°). Wide landscapes sit
+       close radius). The 16 photos fan out left/right at progressively larger
+       radius (8 per side). Azimuths + radii are re-solved (layout_solver,
+       2026-08-03, adding 6 new photos to the original 10) so each plane's
+       on-screen angular width stays clear of its neighbours — no
+       cramping/overlap anywhere (min adjacent gap ≈ 1.26°). Wide landscapes sit
        at the largest radii so their angular footprint stays small. ---------- */
     const GV  = (n) => `assets/gallery/video-${n}.mp4`;
     const GVP = (n) => `assets/gallery/video-${n}-poster.webp`;
@@ -3620,26 +3640,32 @@
     const VID_H = 5.33, PORT_H = 3.47, PORT_S_H = 3.07, LAND_H = 2.70, LAND_L_H = 3.15;
     // Nominal aspect just for the placeholder geometry shown until media loads.
     const HINT_V = 0.5625, HINT_P = 0.66, HINT_L = 1.4;
-    // Mobile (≤768px) drops all 3 centre videos — the 10 fanned photos stay
+    // Mobile (≤768px) drops all 3 centre videos — the 16 fanned photos stay
     // exactly where they are (an intentional gap through the centre of the
-    // sweep on mobile only; desktop keeps the full 13-plane composition).
+    // sweep on mobile only; desktop keeps the full 19-plane composition).
     const planeConfigsAll = [
       // --- centre focal trio: the 3 videos (azimuth -23/0/+23) ---
       { type: 'video', src: GV(2), poster: GVP(2), azimuth: -23, radius: 8.5, y:  0.2, h: VID_H,    hint: HINT_V, alt: 'Tailor Express — fitting and finishing a garment.' },
       { type: 'video', src: GV(1), poster: GVP(1), azimuth:   0, radius: 7.5, y:  0.0, h: VID_H,    hint: HINT_V, alt: 'Tailor Express — alterations in progress.' },
       { type: 'video', src: GV(3), poster: GVP(3), azimuth:  23, radius: 8.5, y:  0.4, h: VID_H,    hint: HINT_V, alt: 'Tailor Express — tailoring in the atelier.' },
       // --- photos fanning out to the LEFT ---
-      { type: 'image', src: GP(1), azimuth: -40, radius: 11.0, y: -1.2, h: PORT_H,   hint: HINT_P, alt: 'Hand-finishing a garment at Tailor Express.' },
-      { type: 'image', src: GL(1), azimuth: -54, radius: 15.0, y:  1.6, h: LAND_H,   hint: HINT_L, alt: 'Tailor Express workspace.' },
-      { type: 'image', src: GP(2), azimuth: -67, radius: 11.0, y:  0.3, h: PORT_S_H, hint: HINT_P, alt: 'Tailoring detail at Tailor Express.' },
-      { type: 'image', src: GL(2), azimuth: -80, radius: 17.0, y: -1.8, h: LAND_L_H, hint: HINT_L, alt: 'Tailor Express interior.' },
-      { type: 'image', src: GP(3), azimuth: -93, radius: 13.0, y:  2.2, h: PORT_H,   hint: HINT_P, alt: 'Inside a Tailor Express atelier.' },
+      { type: 'image', src: GP(1), azimuth:  -41.1, radius: 11.0, y: -1.2, h: PORT_H,   hint: HINT_P, alt: 'Hand-finishing a garment at Tailor Express.' },
+      { type: 'image', src: GL(1), azimuth:  -53.7, radius: 16.4, y:  1.6, h: LAND_H,   hint: HINT_L, alt: 'Tailor Express workspace.' },
+      { type: 'image', src: GP(2), azimuth:  -64.5, radius: 13.7, y:  0.3, h: PORT_S_H, hint: HINT_P, alt: 'Tailoring detail at Tailor Express.' },
+      { type: 'image', src: GL(2), azimuth:  -75.3, radius: 19.1, y: -1.8, h: LAND_L_H, hint: HINT_L, alt: 'Tailor Express interior.' },
+      { type: 'image', src: GP(3), azimuth:  -86.0, radius: 16.4, y:  2.2, h: PORT_H,   hint: HINT_P, alt: 'Inside a Tailor Express atelier.' },
+      { type: 'image', src: GL(6), azimuth:  -95.6, radius: 21.8, y: -1.6, h: LAND_H,   hint: HINT_L, alt: 'Threading a needle at a Tailor Express sewing station.' },
+      { type: 'image', src: GP(6), azimuth: -105.7, radius: 19.1, y:  1.8, h: PORT_H,   hint: HINT_P, alt: 'Home-service fitting — measuring a client at home.' },
+      { type: 'image', src: GL(7), azimuth: -116.0, radius: 24.5, y: -0.8, h: LAND_L_H, hint: HINT_L, alt: 'A tailor at work inside a Tailor Express branch.' },
       // --- photos fanning out to the RIGHT ---
-      { type: 'image', src: GL(3), azimuth:  41, radius: 16.0, y:  1.4, h: LAND_H,   hint: HINT_L, alt: 'Garments and fabric at Tailor Express.' },
-      { type: 'image', src: GP(4), azimuth:  54, radius: 13.0, y: -1.4, h: PORT_H,   hint: HINT_P, alt: 'Alterations work at Tailor Express.' },
-      { type: 'image', src: GL(4), azimuth:  67, radius: 17.0, y:  0.6, h: LAND_H,   hint: HINT_L, alt: 'Tailoring tools and materials.' },
-      { type: 'image', src: GP(5), azimuth:  80, radius: 13.0, y:  2.0, h: PORT_S_H, hint: HINT_P, alt: 'Pinning and measuring at Tailor Express.' },
-      { type: 'image', src: GL(5), azimuth:  96, radius: 19.0, y: -2.0, h: LAND_L_H, hint: HINT_L, alt: 'Finished tailoring work.' },
+      { type: 'image', src: GL(3), azimuth:   42.8, radius: 15.0, y:  1.4, h: LAND_H,   hint: HINT_L, alt: 'Garments and fabric at Tailor Express.' },
+      { type: 'image', src: GP(4), azimuth:   55.8, radius: 12.3, y: -1.4, h: PORT_H,   hint: HINT_P, alt: 'Alterations work at Tailor Express.' },
+      { type: 'image', src: GL(4), azimuth:   67.6, radius: 17.7, y:  0.6, h: LAND_H,   hint: HINT_L, alt: 'Tailoring tools and materials.' },
+      { type: 'image', src: GP(5), azimuth:   79.3, radius: 15.1, y:  2.0, h: PORT_S_H, hint: HINT_P, alt: 'Pinning and measuring at Tailor Express.' },
+      { type: 'image', src: GL(5), azimuth:   93.0, radius: 20.4, y: -2.0, h: LAND_L_H, hint: HINT_L, alt: 'Finished tailoring work.' },
+      { type: 'image', src: GP(7), azimuth:  105.7, radius: 17.8, y: -1.7, h: PORT_H,   hint: HINT_P, alt: 'A Tailor Express home-service delivery, freshly altered garments in hand.' },
+      { type: 'image', src: GL(8), azimuth:  115.7, radius: 23.1, y:  1.9, h: LAND_H,   hint: HINT_L, alt: 'The Tailor Express brand mark inside a branch interior.' },
+      { type: 'image', src: GP(8), azimuth:  124.9, radius: 20.5, y: -0.9, h: PORT_S_H, hint: HINT_P, alt: 'A female tailor providing a home-service fitting.' },
     ];
     const planeConfigs = isMobile
       ? planeConfigsAll.filter((c) => c.type !== 'video')
